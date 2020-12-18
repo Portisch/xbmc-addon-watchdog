@@ -28,7 +28,7 @@ from threading import Condition
 
 
 def log(msg, level=xbmc.LOGDEBUG):
-    import settings
+    from . import settings
     xbmc.log(("[" + settings.ADDON_ID + "] " + msg).encode('utf-8', 'replace'), level)
 
 

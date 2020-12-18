@@ -23,15 +23,15 @@ import traceback
 import threading
 import xbmc
 import xbmcgui
-import utils
-import settings
-import emitters
-import videolibrary
-from utils import escape_param, log
+from . import utils
+from . import settings
+from . import emitters
+from . import videolibrary
+from .utils import escape_param, log
 from itertools import repeat
 from watchdog.events import FileSystemEventHandler
 from watchdog.utils.compat import Event
-from emitters import MultiEmitterObserver
+from .emitters import MultiEmitterObserver
 
 
 class XBMCIF(threading.Thread):
@@ -187,11 +187,11 @@ def main():
 
     sources = []
     video_sources = settings.VIDEO_SOURCES
-    sources.extend(zip(repeat('video'), video_sources))
+    sources.extend(list(zip(repeat('video'), video_sources)))
     log("video sources %s" % video_sources)
 
     music_sources = settings.MUSIC_SOURCES
-    sources.extend(zip(repeat('music'), music_sources))
+    sources.extend(list(zip(repeat('music'), music_sources)))
     log("music sources %s" % music_sources)
 
     xbmcif = XBMCIF()

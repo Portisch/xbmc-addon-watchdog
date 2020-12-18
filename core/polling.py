@@ -18,10 +18,10 @@
 from __future__ import unicode_literals
 
 import xbmc
-import settings
+from . import settings
 from watchdog.observers.api import EventEmitter
 from watchdog.events import FileCreatedEvent, FileDeletedEvent
-from utils import log, XBMCInterrupt
+from .utils import log, XBMCInterrupt
 
 
 def _paused():

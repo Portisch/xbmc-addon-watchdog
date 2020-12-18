@@ -21,7 +21,7 @@ import os
 import xbmc
 import json
 import time
-from utils import is_url, rpc, log
+from .utils import is_url, rpc, log
 
 
 def _split_path(path):

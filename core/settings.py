@@ -18,7 +18,7 @@
 from __future__ import unicode_literals
 
 import xbmcaddon
-import utils
+from . import utils
 
 ADDON = xbmcaddon.Addon()
 ADDON_ID = ADDON.getAddonInfo('id').decode('utf-8')
