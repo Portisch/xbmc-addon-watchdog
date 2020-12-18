@@ -81,7 +81,7 @@ class XBMCIF(threading.Thread):
             # this commands gets flushed from the queue.
             cmd = self._cmd_queue.get_nowait()
             log("[xbmcif] executing builtin: '%s'" % cmd)
-            xbmc.executebuiltin(cmd.encode('utf-8'))
+            xbmc.executebuiltin(cmd)
 
             # wait for scan to start. we need a timeout or else we a screwed
             # if we missed it.
@@ -116,7 +116,7 @@ class EventHandler(FileSystemEventHandler):
         self.library = library
         self.path = path
         self.xbmcif = xbmcif
-        self.supported_media = '|' + xbmc.getSupportedMedia(library).decode('utf-8') + '|'
+        self.supported_media = '|' + xbmc.getSupportedMedia(library) + '|'
 
     def on_created(self, event):
         if not event.is_directory and not self._can_skip(event, event.src_path):
@@ -167,6 +167,7 @@ class EventHandler(FileSystemEventHandler):
 
 def main():
     progress = xbmcgui.DialogProgressBG()
+    monitor = xbmc.Monitor()
     try:
         progress.create("Watchdog starting. Please wait...")
     except:
@@ -178,9 +179,8 @@ def main():
         if progress:
             progress.update(0, message=msg % settings.STARTUP_DELAY)
         start = time.time()
-        while time.time() - start < settings.STARTUP_DELAY:
-            xbmc.sleep(100)
-            if xbmc.abortRequested:
+        while (time.time() - start < settings.STARTUP_DELAY) and not monitor.abortRequested():
+            if monitor.waitForAbort(1):
                 if progress:
                     progress.close()
                 return
@@ -212,14 +212,14 @@ def main():
 
     for i, (libtype, path) in enumerate(sources):
         if progress:
-            progress.update((i+1)/len(sources)*100, message="Setting up %s" % path)
+            progress.update(int((i+1)/len(sources)*100), message="Setting up %s" % path)
         try:
             emitter_cls = emitters.select_emitter(path)
         except IOError:
             log("not watching <%s>. does not exist" % path)
             continue
         finally:
-            if xbmc.abortRequested:
+            if monitor.abortRequested():
                 break
 
         eh = EventHandler(libtype, path, xbmcif)
@@ -230,7 +230,7 @@ def main():
             traceback.print_exc()
             log("failed to watch <%s>" % path)
         finally:
-            if xbmc.abortRequested:
+            if monitor.abortRequested():
                 break
 
     xbmcif.start()
@@ -249,12 +249,7 @@ def main():
         except:
             dialog = None
 
-    if xbmc.__version__ >= '2.19.0':
-        monitor = xbmc.Monitor()
-        monitor.waitForAbort()
-    else:
-        while not xbmc.abortRequested:
-            xbmc.sleep(100)
+    monitor.waitForAbort()
 
     log("stopping..")
     observer.stop()

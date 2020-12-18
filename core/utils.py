@@ -23,13 +23,13 @@ import sys
 import xbmc
 import xbmcgui
 import json
-from urllib import unquote
+from urllib import parse
 from threading import Condition
 
 
 def log(msg, level=xbmc.LOGDEBUG):
     from . import settings
-    xbmc.log(("[" + settings.ADDON_ID + "] " + msg).encode('utf-8', 'replace'), level)
+    xbmc.log(("[" + settings.ADDON_ID + "] " + msg), level)
 
 
 def encode_path(path):
@@ -56,8 +56,8 @@ def escape_param(s):
 
 
 def rpc(method, **params):
-    params = json.dumps(params, encoding='utf-8')
-    query = b'{"jsonrpc": "2.0", "method": "%s", "params": %s, "id": 1}' % (method, params)
+    params = json.dumps(params)
+    query = '{"jsonrpc": "2.0", "method": "%s", "params": %s, "id": 1}' % (method, params)
     return json.loads(xbmc.executeJSONRPC(query), encoding='utf-8')
 
 
@@ -66,7 +66,7 @@ def _split_multipaths(paths):
     for path in paths:
         if path.startswith("multipath://"):
             subpaths = path.split("multipath://")[1].split('/')
-            subpaths = [unquote(path) for path in subpaths if path != ""]
+            subpaths = [parse.unquote(path) for path in subpaths if path != ""]
             ret.extend(subpaths)
         else:
             ret.append(path)
